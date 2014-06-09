@@ -29,6 +29,17 @@ class TestWineAllocation(unittest.TestCase):
     def get_stdout(self):
         return self.tee.close_and_get_output().splitlines()
 
+    def perform_test_and_verify_result(self, lines, num_out_lines):
+        allocator = wine_allocator.WineAllocator()
+        allocator.process(lines)
+        out_lines = self.get_stdout()
+        self.assertEqual(str(num_out_lines), out_lines[0])
+        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
+        self.assertTrue(set(out_lines[1:]).issubset(set(lines)))
+        # The next test asserts the results contain non-repeating wines
+        # and that there are no more than 3 instances of the same person.
+        wine_allocator.verify_result_file()
+
     def test_no_contention(self):
         lines = ("p1\tw1",
                  "p1\tw2",
@@ -41,14 +52,7 @@ class TestWineAllocation(unittest.TestCase):
                  "p4\tw9",
                  "p5\tw10",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("8", out_lines[0])
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        self.assertTrue("p5\tw10" in out_lines)
-        self.assertTrue("p1\tw3" in out_lines)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 8)
 
     def test_contention_for_one(self):
         lines = ("p1\tw1",
@@ -59,14 +63,7 @@ class TestWineAllocation(unittest.TestCase):
                  "p2\tw1",
                  "p2\tw6",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("5", out_lines[0])
-        self.assertTrue("p2\tw6" in out_lines)
-        self.assertTrue("p1\tw3" in out_lines)
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 5)
 
     def test_simple_contention_for_two(self):
         lines = ("p1\tw1",
@@ -75,14 +72,7 @@ class TestWineAllocation(unittest.TestCase):
                  "p4\tw2",
                  "p5\tw2",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("2", out_lines[0])
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        self.assertTrue("p2\tw1" in out_lines)
-        self.assertTrue("p4\tw2" in out_lines)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 2)
 
     def test_only_quad_contention(self):
         lines = ("p0\tw1",
@@ -100,12 +90,7 @@ class TestWineAllocation(unittest.TestCase):
                  "p3\tw1",
                  "p3\tw2",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("4", out_lines[0])
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 4)
 
     def test_cant_sell_all(self):
         lines = ("p0\tw1",
@@ -123,14 +108,9 @@ class TestWineAllocation(unittest.TestCase):
                  "p1\tw6",
                  "p1\tw7",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("6", out_lines[0])
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 6)
 
-    def test_tricky_contention(self):
+    def test_adhoc_contention(self):
         lines = ("p0\tw1",
                  "p0\tw2",
                  "p1\tw1",
@@ -144,14 +124,7 @@ class TestWineAllocation(unittest.TestCase):
                  "p4\tw9",
                  "p5\tw10",
                  )
-        allocator = wine_allocator.WineAllocator()
-        allocator.process(lines)
-        out_lines = self.get_stdout()
-        self.assertEqual("10", out_lines[0])
-        self.assertEqual(int(out_lines[0]), len(out_lines)-1)
-        self.assertTrue("p2\tw7" in out_lines)
-        self.assertTrue("p1\tw3" in out_lines)
-        wine_allocator.verify_result_file()
+        self.perform_test_and_verify_result(lines, 10)
 
 if __name__ == '__main__':
     unittest.main()

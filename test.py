@@ -38,7 +38,7 @@ class TestWineAllocation(unittest.TestCase):
         self.assertTrue(set(out_lines[1:]).issubset(set(lines)))
         # The next test asserts the results contain non-repeating wines
         # and that there are no more than 3 instances of the same person.
-        wine_allocator.verify_result_file()
+        wine_allocator.verify_result_file(allocator.outfile.name)
 
     def test_no_contention(self):
         lines = ("p1\tw1",

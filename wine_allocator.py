@@ -2,10 +2,12 @@
 
 """Solve the Wine Tasting problem at http://bloomreach.com/puzzles/"""
 
+from os import remove
 import time
 import zipfile
 from collections import defaultdict
 from optparse import OptionParser
+from tempfile import NamedTemporaryFile
 
 __author__ = "David Blume"
 __copyright__ = "Copyright 2014, David Blume"
@@ -13,17 +15,18 @@ __license__ = "http://www.wtfpl.net/"
 
 # Nobody may buy more than this many bottles of wine
 max_wines_per_person = 3
-out_file = 'out.txt'
 
 
-def verify_result_file():
+def verify_result_file(filename):
     """
     Ensures the results contain non-repeating wines and
     no more than (max_wines_per_person) instances of the same person.
+
+    :param filename: The name of the results file to verify
     """
     wines = set()
     people = defaultdict(int)
-    with open(out_file, 'r') as f:
+    with open(filename, 'r') as f:
         for line in f:
             person, wine = line.strip().split('\t')
             assert(wine not in wines)
@@ -39,7 +42,10 @@ class WineAllocator(object):
         self.wines = defaultdict(list)       # each wine and all the people who want it
         self.people_have = defaultdict(int)  # each person's count of wines they got
         self.wines_sold = 0
-        self.outfile = open(out_file, 'w')
+        self.outfile = NamedTemporaryFile(mode='w', delete=False)
+
+    def __del__(self):
+        remove(self.outfile.name)
 
     def remove_wine(self, wine):
         """
@@ -58,8 +64,9 @@ class WineAllocator(object):
     def remove_person(self, person):
         """
         Removes the person from each wine's list of potential buyers
-        NOTE: If, after removing this person, only one other person wanted
-        a particular wine, that other person gets to have it.
+
+        Potential change: If, after removing this person, only one other
+        person wanted a particular wine, that other person gets to have it.
 
         :param person: The person to remove
         :return: true if any lists became empty
@@ -75,6 +82,7 @@ class WineAllocator(object):
 #            elif num_buyers == 1:
 #                # Only one other person wanted this wine. Let them have it.
 #                # Note: This can be recursive.
+#                # Try doing the selling outside this for loop.
 #                buyer = self.wines[wine][0]
 #                if self.people_have[buyer] < max_wines_per_person:
 #                    self.sell_wine(wine, buyer)
@@ -176,7 +184,7 @@ class WineAllocator(object):
 
         self.outfile.close()
         print self.wines_sold
-        with open(out_file, 'r') as f:
+        with open(self.outfile.name, 'r') as f:
             for line in f:
                 print line.strip()
 
@@ -193,7 +201,7 @@ def main(fname, debug):
         with open(fname, 'r') as f:
             wine_allocator.process(f)
     if debug:
-        verify_result_file()
+        verify_result_file(wine_allocator.outfile.name)
         print "Done.  That took %1.2fs." % (time.time() - start_time)
 
 if __name__ == '__main__':

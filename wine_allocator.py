@@ -1,4 +1,4 @@
-#!/usr/bin/env python -u
+#!/usr/bin/env python
 
 """Solve the Wine Tasting problem at http://bloomreach.com/puzzles/"""
 

@@ -1,7 +1,7 @@
 [![Code Climate](https://codeclimate.com/github/dblume/wine-tasting/badges/gpa.svg)](https://codeclimate.com/github/dblume/wine-tasting)
 [![Issue Count](https://codeclimate.com/github/dblume/wine-tasting/badges/issue_count.svg)](https://codeclimate.com/github/dblume/wine-tasting/issues)
 [![License](https://img.shields.io/badge/license-MIT_license-blue.svg)](https://github.com/dblume/wine-tasting/blob/main/LICENSE.txt)
-![python2.x](https://img.shields.io/badge/python-2.x-yellow.svg)
+![python2.x](https://img.shields.io/badge/python-2.x-yellow.svg) [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
 # wine-tasting
 
 An attempt to solve [the Wine Tasting problem at Bloomreach](http://bloomreach.com/puzzles/) in Python.
